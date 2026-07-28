@@ -10,9 +10,18 @@ const QUICK = [
   { id: 'saved', icon: '⭐', label: 'Saved', sub: 'your favourites' },
 ]
 
+const LABEL = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.label.toLowerCase()]))
+
+function crewNames(students) {
+  const names = students.map((s) => s.name)
+  if (names.length <= 2) return names.join(' and ')
+  return `${names[0]}, ${names[1]} + ${names.length - 2} other${names.length > 3 ? 's' : ''}`
+}
+
 export default function HomeScreen({
   user, hour, recents, forYou, nearby,
   onNavigate, onAsk, onCategory, onSelectPlace,
+  crews = [], onOpenChat,
 }) {
   const [q, setQ] = useState('')
 
@@ -39,6 +48,31 @@ export default function HomeScreen({
         />
         <button className="askbar__go" disabled={!q.trim()}>ASK</button>
       </form>
+
+      {crews.length > 0 && (
+        <>
+          <div className="section">Your crew</div>
+          {crews.map((c) => (
+            <div key={c.category} className="crew">
+              <div className="crew__faces">
+                {c.students.slice(0, 3).map((s) => <span key={s.id}>{s.avatar}</span>)}
+              </div>
+              <p className="crew__text">
+                <b>{crewNames(c.students)}</b> are into {LABEL[c.category] ?? c.category} just
+                like you. wanna hit <b>{c.place.name}</b> this sunday?
+              </p>
+              <div className="crew__btns">
+                <button className="btn btn--gold btn--sm" onClick={() => onOpenChat(c.category)}>
+                  💬 group chat
+                </button>
+                <button className="btn btn--ghost btn--sm" onClick={() => onSelectPlace(c.place.id)}>
+                  see the spot
+                </button>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
 
       <div className="section">Quick actions</div>
       <div className="tiles tiles--big">

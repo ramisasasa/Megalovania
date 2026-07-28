@@ -12,7 +12,9 @@ import ProfileScreen from './screens/ProfileScreen'
 import EditProfileScreen from './screens/EditProfileScreen'
 import InterestsScreen from './screens/InterestsScreen'
 import SettingsScreen from './screens/SettingsScreen'
+import CrewChatScreen from './screens/CrewChatScreen'
 import { SEED_PLACES, CITY } from './data/places'
+import { SEED_STUDENTS } from './data/students'
 import { searchPlaces, runNaturalSearch } from './lib/search'
 import { distanceMeters, bayesianScore, isOpenAt } from './lib/geo'
 import { loadState, saveState, resetState } from './lib/store'
@@ -23,6 +25,7 @@ const BASE_FILTERS = { categories: [], maxBudget: 3500, openNow: false, tags: []
 const TAB_FOR = {
   home: 'home', explore: 'explore', ask: 'ask', top: 'top', saved: 'saved',
   profile: 'profile', settings: 'profile', editProfile: 'profile', interests: 'profile',
+  crewChat: 'home',
 }
 
 export default function App() {
@@ -40,6 +43,7 @@ export default function App() {
   const [aiResults, setAiResults] = useState(null)
 
   const [selectedId, setSelectedId] = useState(null)
+  const [activeCrew, setActiveCrew] = useState(null)
   const [pinMode, setPinMode] = useState(false)
   const [pendingCoords, setPendingCoords] = useState(null)
 
@@ -123,6 +127,24 @@ export default function App() {
     [nearby]
   )
 
+  /** Seed students who share an interest with you, paired with the best spot
+      for it in range — "Rafi + 2 others game just like you, hit Spotlight?" */
+  const crews = useMemo(() => {
+    const interests = state.user?.interests ?? []
+    return interests
+      .map((cat) => {
+        const students = SEED_STUDENTS.filter((s) => s.interests.includes(cat))
+        const top = searchPlaces(allPlaces, {
+          userLocation, radius, hour,
+          filters: { ...BASE_FILTERS, categories: [cat] },
+        })[0]
+        if (students.length < 2 || !top) return null
+        return { category: cat, students, place: top.place }
+      })
+      .filter(Boolean)
+      .slice(0, 2)
+  }, [state.user, allPlaces, userLocation, radius, hour])
+
   /** Places this browser has opened most, inside the current radius. */
   const mostVisited = useMemo(
     () => nearby
@@ -203,6 +225,13 @@ export default function App() {
     setSelectedId(place.id)
   }
 
+  function sendChat(category, msg) {
+    setState((s) => ({
+      ...s,
+      chats: { ...s.chats, [category]: [...(s.chats?.[category] ?? []), msg] },
+    }))
+  }
+
   function openCategory(id) {
     clearSearch()
     setFilters({ ...BASE_FILTERS, categories: [id] })
@@ -257,6 +286,8 @@ export default function App() {
         onAsk={runSearch}
         onCategory={openCategory}
         onSelectPlace={openPlace}
+        crews={crews}
+        onOpenChat={(cat) => { setActiveCrew(cat); setScreen('crewChat') }}
       />
     ),
     explore: (
@@ -326,6 +357,19 @@ export default function App() {
         onBack={() => setScreen('profile')}
       />
     ),
+    crewChat: (() => {
+      const crew = crews.find((c) => c.category === activeCrew)
+      return crew && (
+        <CrewChatScreen
+          crew={crew}
+          messages={state.chats?.[crew.category] ?? []}
+          onSend={(msg) => sendChat(crew.category, msg)}
+          onBack={() => setScreen('home')}
+          onSelectPlace={openPlace}
+          user={state.user}
+        />
+      )
+    })(),
     settings: (
       <SettingsScreen
         settings={state.settings}
@@ -342,6 +386,7 @@ export default function App() {
 
   const TITLES = {
     settings: 'SETTINGS', editProfile: 'EDIT PROFILE', interests: 'INTERESTS',
+    crewChat: 'CREW CHAT',
   }
 
   return (

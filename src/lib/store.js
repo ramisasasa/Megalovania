@@ -11,6 +11,7 @@ const empty = {
   reviews: [],
   userPlaces: [],
   visits: {},
+  chats: {},
 }
 
 export function loadState() {
