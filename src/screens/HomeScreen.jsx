@@ -10,6 +10,22 @@ const QUICK = [
   { id: 'saved', icon: '⭐', label: 'Saved', sub: 'your favourites' },
 ]
 
+// The home screen shows a curated subset, split into places vs. activities so
+// the grid stays breathable. The full 11-category list still lives in Explore.
+const EXPLORE_TILES = [
+  { icon: '☕', label: 'Cafés', categories: ['cafe'] },
+  { icon: '🍽️', label: 'Restaurants', categories: ['restaurant'] },
+  { icon: '⚽', label: 'Sports', categories: ['sports'] },
+]
+
+const ACTIVITY_TILES = [
+  { icon: '🎬', label: 'Movies', categories: ['movies'] },
+  { icon: '🛋️', label: 'Chill Hangouts', categories: ['hangout'] },
+  // Not a category of its own — study spots are cafés ranked by study tags.
+  { icon: '📚', label: 'Study Sessions', categories: ['cafe'], tags: ['study', 'wifi', 'quiet'] },
+  { icon: '🎮', label: 'Gaming Sessions', categories: ['gaming'] },
+]
+
 const LABEL = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.label.toLowerCase()]))
 
 function crewNames(students) {
@@ -85,12 +101,22 @@ export default function HomeScreen({
         ))}
       </div>
 
-      <div className="section">What are you after</div>
+      <div className="section">What are you interested in exploring</div>
+      <div className="tiles tiles--3">
+        {EXPLORE_TILES.map((t) => (
+          <button key={t.label} className="tile" onClick={() => onCategory(t)}>
+            <span className="tile__icon">{t.icon}</span>
+            <span className="tile__label">{t.label}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="section">What activities are you interested in joining</div>
       <div className="tiles">
-        {CATEGORIES.map((c) => (
-          <button key={c.id} className="tile" onClick={() => onCategory(c.id)}>
-            <span className="tile__icon">{c.icon}</span>
-            <span className="tile__label">{c.label}</span>
+        {ACTIVITY_TILES.map((t) => (
+          <button key={t.label} className="tile" onClick={() => onCategory(t)}>
+            <span className="tile__icon">{t.icon}</span>
+            <span className="tile__label">{t.label}</span>
           </button>
         ))}
       </div>

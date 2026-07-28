@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import BottomNav from './components/BottomNav'
 import LoginGate from './components/LoginGate'
 import PlaceDetail from './components/PlaceDetail'
@@ -32,6 +32,9 @@ export default function App() {
   const [state, setState] = useState(loadState)
   const [gateDismissed, setGateDismissed] = useState(false)
   const [screen, setScreen] = useState('home')
+  // Where you drilled in from, oldest first. Bottom-nav taps reset it — the nav
+  // is absolute positioning, the back button is relative.
+  const [trail, setTrail] = useState([])
 
   const [userLocation, setUserLocation] = useState(CITY.center)
   const [locStatus, setLocStatus] = useState('locating')
@@ -162,24 +165,42 @@ export default function App() {
 
   // ── Actions ───────────────────────────────────────────────────────────────
 
-  const runSearch = useCallback(
-    (q) => {
-      setScreen('ask')
-      setThinking(true)
-      setAnswer(null)
-      setState((s) => ({ ...s, recents: [q, ...s.recents.filter((r) => r !== q)].slice(0, 8) }))
+  /** Drill into a screen, remembering where you came from. */
+  function navigate(next) {
+    if (next === screen) return
+    setTrail((t) => [...t, screen])
+    setScreen(next)
+  }
 
-      // Small delay so Sans visibly "thinks" instead of the UI snapping.
-      setTimeout(() => {
-        const { results: r, answer: a, radius: newRadius } = runNaturalSearch(q, allPlaces, ctx)
-        if (newRadius !== radius) setRadius(newRadius)
-        setAiResults(a.unknown ? null : r)
-        setAnswer(a)
-        setThinking(false)
-      }, 500)
-    },
-    [allPlaces, ctx, radius]
-  )
+  /** Pop back to wherever you drilled in from; home if the trail is empty. */
+  function goBack() {
+    const prev = trail[trail.length - 1] ?? 'home'
+    setTrail((t) => t.slice(0, -1))
+    setScreen(prev)
+  }
+
+  /** Jump to a root tab: clears the trail so "back" doesn't tunnel through tabs. */
+  function jumpTab(tab) {
+    setTrail([])
+    setScreen(tab)
+    setSelectedId(null)
+  }
+
+  function runSearch(q) {
+    navigate('ask')
+    setThinking(true)
+    setAnswer(null)
+    setState((s) => ({ ...s, recents: [q, ...s.recents.filter((r) => r !== q)].slice(0, 8) }))
+
+    // Small delay so Sans visibly "thinks" instead of the UI snapping.
+    setTimeout(() => {
+      const { results: r, answer: a, radius: newRadius } = runNaturalSearch(q, allPlaces, ctx)
+      if (newRadius !== radius) setRadius(newRadius)
+      setAiResults(a.unknown ? null : r)
+      setAnswer(a)
+      setThinking(false)
+    }, 500)
+  }
 
   function clearSearch() { setAiResults(null); setAnswer(null) }
 
@@ -232,16 +253,19 @@ export default function App() {
     }))
   }
 
-  function openCategory(id) {
+  /** Home tiles pass {categories, tags}; a bare string id still works too. */
+  function openCategory(tile) {
     clearSearch()
-    setFilters({ ...BASE_FILTERS, categories: [id] })
-    setScreen('explore')
+    const t = typeof tile === 'string' ? { categories: [tile] } : tile
+    setFilters({ ...BASE_FILTERS, categories: t.categories ?? [], tags: t.tags ?? [] })
+    navigate('explore')
   }
 
   function hardReset() {
     resetState()
     setState(loadState())
     setGateDismissed(false)
+    setTrail([])
     setScreen('home')
   }
 
@@ -282,12 +306,12 @@ export default function App() {
         recents={state.recents}
         forYou={forYou}
         nearby={nearby}
-        onNavigate={setScreen}
+        onNavigate={navigate}
         onAsk={runSearch}
         onCategory={openCategory}
         onSelectPlace={openPlace}
         crews={crews}
-        onOpenChat={(cat) => { setActiveCrew(cat); setScreen('crewChat') }}
+        onOpenChat={(cat) => { setActiveCrew(cat); navigate('crewChat') }}
       />
     ),
     explore: (
@@ -322,10 +346,10 @@ export default function App() {
         mostVisited={mostVisited}
         radius={radius}
         onSelect={openPlace}
-        onNavigate={setScreen}
+        onNavigate={navigate}
       />
     ),
-    saved: <SavedScreen results={savedResults} onSelect={openPlace} onNavigate={setScreen} />,
+    saved: <SavedScreen results={savedResults} onSelect={openPlace} onNavigate={navigate} />,
     profile: (
       <ProfileScreen
         user={state.user}
@@ -333,9 +357,9 @@ export default function App() {
         userPlaces={state.userPlaces}
         favourites={state.favourites}
         places={allPlaces}
-        onEdit={() => setScreen('editProfile')}
-        onInterests={() => setScreen('interests')}
-        onSettings={() => setScreen('settings')}
+        onEdit={() => navigate('editProfile')}
+        onInterests={() => navigate('interests')}
+        onSettings={() => navigate('settings')}
         onSelectPlace={openPlace}
         onSignIn={() => setGateDismissed(false)}
       />
@@ -344,7 +368,7 @@ export default function App() {
       <EditProfileScreen
         user={state.user}
         onSave={(user) => setState((s) => ({ ...s, user }))}
-        onBack={() => setScreen('profile')}
+        onBack={goBack}
       />
     ),
     interests: state.user && (
@@ -352,9 +376,9 @@ export default function App() {
         user={state.user}
         onSave={(interests) => {
           setState((s) => ({ ...s, user: { ...s.user, interests } }))
-          setScreen('profile')
+          goBack()
         }}
-        onBack={() => setScreen('profile')}
+        onBack={goBack}
       />
     ),
     crewChat: (() => {
@@ -364,7 +388,7 @@ export default function App() {
           crew={crew}
           messages={state.chats?.[crew.category] ?? []}
           onSend={(msg) => sendChat(crew.category, msg)}
-          onBack={() => setScreen('home')}
+          onBack={goBack}
           onSelectPlace={openPlace}
           user={state.user}
         />
@@ -378,7 +402,7 @@ export default function App() {
         places={allPlaces}
         onSelectPlace={openPlace}
         onRemoveFavourite={toggleFavourite}
-        onBack={() => setScreen('profile')}
+        onBack={goBack}
         onReset={hardReset}
       />
     ),
@@ -393,6 +417,9 @@ export default function App() {
     <div className="frame">
       <div className="phone">
         <header className="topbar">
+          {trail.length > 0 && (
+            <button className="topbar__back" title="Back" onClick={goBack}>←</button>
+          )}
           <div className="topbar__title">{TITLES[screen] ?? 'MEGALOVANIA'}</div>
           <div className="topbar__row">
             <div className="topbar__loc">
@@ -403,8 +430,8 @@ export default function App() {
               </span>
             </div>
             <div className="topbar__actions">
-              <button className="iconbtn" title="Settings" onClick={() => setScreen('settings')}>⚙</button>
-              <button className="iconbtn" title="Profile" onClick={() => setScreen('profile')}>
+              <button className="iconbtn" title="Settings" onClick={() => navigate('settings')}>⚙</button>
+              <button className="iconbtn" title="Profile" onClick={() => navigate('profile')}>
                 {state.user?.avatar ?? '💀'}
               </button>
             </div>
@@ -417,7 +444,7 @@ export default function App() {
 
         <BottomNav
           tab={TAB_FOR[screen] ?? 'home'}
-          onChange={(t) => { setScreen(t); setSelectedId(null) }}
+          onChange={jumpTab}
         />
 
         {selected && (
