@@ -328,7 +328,6 @@ export default function App() {
         recents={state.recents}
         forYou={forYou}
         nearby={nearby}
-        onNavigate={navigate}
         onAsk={runSearch}
         onCategory={openCategory}
         onSelectPlace={openPlace}
