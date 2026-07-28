@@ -364,6 +364,20 @@ input, textarea, select { font-family: var(--font); }
 .chip--new { border-color: var(--sans); color: var(--sans); padding: 2px 7px; font-size: 11px; }
 .chips__count { margin-left: auto; font-size: 12px; color: var(--dim); }
 
+/* Collapsible filter panel on the merged search screen. */
+.disclose {
+  width: 100%; margin: 14px 0 0;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: none; border: 0; border-bottom: 2px solid var(--line-dim);
+  padding: 8px 2px;
+  font-family: var(--font); font-size: 12px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--dim);
+}
+.disclose:hover { color: var(--gold); border-color: var(--line); }
+.disclose__count {
+  letter-spacing: 0; text-transform: none; font-size: 11.5px; color: var(--gold);
+}
+
 /* Manual min/max budget entry, under the coarse slider. */
 .range { display: flex; align-items: flex-end; gap: 8px; margin-top: 8px; }
 .range__field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
@@ -604,7 +618,7 @@ input, textarea, select { font-family: var(--font); }
   flex-shrink: 0;
   border-top: 2px solid var(--line);
   background: var(--bg);
-  display: grid; grid-template-columns: repeat(6, 1fr);
+  display: grid; grid-template-columns: repeat(5, 1fr);
   position: relative;
   z-index: 1200; /* same reason as .topbar — Leaflet panes outrank 30 */
 }
