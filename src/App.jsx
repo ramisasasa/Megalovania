@@ -5,23 +5,27 @@ import PlaceDetail from './components/PlaceDetail'
 import AddSpotModal from './components/AddSpotModal'
 import HomeScreen from './screens/HomeScreen'
 import AskScreen from './screens/AskScreen'
+import RecommendedScreen from './screens/RecommendedScreen'
 import ExploreScreen from './screens/ExploreScreen'
 import SavedScreen from './screens/SavedScreen'
 import ProfileScreen from './screens/ProfileScreen'
 import EditProfileScreen from './screens/EditProfileScreen'
 import InterestsScreen from './screens/InterestsScreen'
 import SettingsScreen from './screens/SettingsScreen'
+import CrewChatScreen from './screens/CrewChatScreen'
 import { SEED_PLACES, CITY } from './data/places'
+import { SEED_STUDENTS } from './data/students'
 import { searchPlaces, runNaturalSearch } from './lib/search'
-import { distanceMeters, bayesianScore } from './lib/geo'
+import { distanceMeters, bayesianScore, isOpenAt } from './lib/geo'
 import { loadState, saveState, resetState } from './lib/store'
 
 const BASE_FILTERS = { categories: [], maxBudget: 3500, openNow: false, tags: [] }
 
 /** Which bottom-nav tab should light up for a given screen. */
 const TAB_FOR = {
-  home: 'home', explore: 'explore', ask: 'ask', saved: 'saved',
+  home: 'home', explore: 'explore', ask: 'ask', top: 'top', saved: 'saved',
   profile: 'profile', settings: 'profile', editProfile: 'profile', interests: 'profile',
+  crewChat: 'home',
 }
 
 export default function App() {
@@ -39,6 +43,7 @@ export default function App() {
   const [aiResults, setAiResults] = useState(null)
 
   const [selectedId, setSelectedId] = useState(null)
+  const [activeCrew, setActiveCrew] = useState(null)
   const [pinMode, setPinMode] = useState(false)
   const [pendingCoords, setPendingCoords] = useState(null)
 
@@ -111,9 +116,43 @@ export default function App() {
         place: p,
         dist: distanceMeters(userLocation, p),
         stars: bayesianScore(p.reviews),
-        open: true,
+        open: isOpenAt(p, hour),
       })),
-    [state.favourites, allPlaces, userLocation]
+    [state.favourites, allPlaces, userLocation, hour]
+  )
+
+  /** Highest-rated places inside the current radius. */
+  const recommended = useMemo(
+    () => [...nearby].sort((a, b) => b.stars - a.stars).slice(0, 6),
+    [nearby]
+  )
+
+  /** Seed students who share an interest with you, paired with the best spot
+      for it in range — "Rafi + 2 others game just like you, hit Spotlight?" */
+  const crews = useMemo(() => {
+    const interests = state.user?.interests ?? []
+    return interests
+      .map((cat) => {
+        const students = SEED_STUDENTS.filter((s) => s.interests.includes(cat))
+        const top = searchPlaces(allPlaces, {
+          userLocation, radius, hour,
+          filters: { ...BASE_FILTERS, categories: [cat] },
+        })[0]
+        if (students.length < 2 || !top) return null
+        return { category: cat, students, place: top.place }
+      })
+      .filter(Boolean)
+      .slice(0, 2)
+  }, [state.user, allPlaces, userLocation, radius, hour])
+
+  /** Places this browser has opened most, inside the current radius. */
+  const mostVisited = useMemo(
+    () => nearby
+      .map((r) => ({ ...r, visits: state.visits[r.place.id] ?? 0 }))
+      .filter((r) => r.visits > 0)
+      .sort((a, b) => b.visits - a.visits)
+      .slice(0, 6),
+    [nearby, state.visits]
   )
 
   const selected = useMemo(() => {
@@ -186,6 +225,13 @@ export default function App() {
     setSelectedId(place.id)
   }
 
+  function sendChat(category, msg) {
+    setState((s) => ({
+      ...s,
+      chats: { ...s.chats, [category]: [...(s.chats?.[category] ?? []), msg] },
+    }))
+  }
+
   function openCategory(id) {
     clearSearch()
     setFilters({ ...BASE_FILTERS, categories: [id] })
@@ -240,6 +286,8 @@ export default function App() {
         onAsk={runSearch}
         onCategory={openCategory}
         onSelectPlace={openPlace}
+        crews={crews}
+        onOpenChat={(cat) => { setActiveCrew(cat); setScreen('crewChat') }}
       />
     ),
     explore: (
@@ -266,6 +314,15 @@ export default function App() {
         onSelect={openPlace}
         area={state.user?.area ?? CITY.area}
         recents={state.recents}
+      />
+    ),
+    top: (
+      <RecommendedScreen
+        recommended={recommended}
+        mostVisited={mostVisited}
+        radius={radius}
+        onSelect={openPlace}
+        onNavigate={setScreen}
       />
     ),
     saved: <SavedScreen results={savedResults} onSelect={openPlace} onNavigate={setScreen} />,
@@ -300,6 +357,19 @@ export default function App() {
         onBack={() => setScreen('profile')}
       />
     ),
+    crewChat: (() => {
+      const crew = crews.find((c) => c.category === activeCrew)
+      return crew && (
+        <CrewChatScreen
+          crew={crew}
+          messages={state.chats?.[crew.category] ?? []}
+          onSend={(msg) => sendChat(crew.category, msg)}
+          onBack={() => setScreen('home')}
+          onSelectPlace={openPlace}
+          user={state.user}
+        />
+      )
+    })(),
     settings: (
       <SettingsScreen
         settings={state.settings}
@@ -316,6 +386,7 @@ export default function App() {
 
   const TITLES = {
     settings: 'SETTINGS', editProfile: 'EDIT PROFILE', interests: 'INTERESTS',
+    crewChat: 'CREW CHAT',
   }
 
   return (

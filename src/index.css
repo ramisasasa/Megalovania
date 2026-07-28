@@ -573,7 +573,7 @@ input, textarea, select { font-family: var(--font); }
   flex-shrink: 0;
   border-top: 2px solid var(--line);
   background: var(--bg);
-  display: grid; grid-template-columns: repeat(5, 1fr);
+  display: grid; grid-template-columns: repeat(6, 1fr);
   z-index: 30;
 }
 .navbtn {
@@ -645,6 +645,51 @@ input, textarea, select { font-family: var(--font); }
 .recent:hover { color: var(--gold); padding-left: 8px; }
 .recent__icon { color: var(--dim); flex-shrink: 0; }
 .recent__text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Crew cards + group chat ────────────────────────────────────────────── */
+
+.crew {
+  border: 2px solid var(--line-dim); background: var(--panel);
+  padding: 12px; margin-bottom: 8px;
+}
+.crew__faces { display: flex; gap: 4px; font-size: 20px; margin-bottom: 6px; }
+.crew__faces span {
+  width: 32px; height: 32px; display: grid; place-items: center;
+  border: 2px solid var(--line-dim); background: var(--bg);
+}
+.crew__text { margin: 0 0 10px; font-size: 13.5px; color: var(--muted); }
+.crew__text b { color: var(--text); font-weight: 400; }
+.crew__btns { display: flex; gap: 8px; }
+
+.chat { display: flex; flex-direction: column; overflow: hidden; }
+.chat__head {
+  flex-shrink: 0; display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-bottom: 2px solid var(--line-dim);
+}
+.chat__who { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.chat__faces { display: flex; font-size: 15px; }
+.chat__faces i { font-style: normal; margin-right: 2px; }
+.chat__names { font-size: 13px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat__names em { display: block; font-style: normal; font-size: 11px; color: var(--dim); }
+.chat__place {
+  flex-shrink: 0; margin: 10px 14px 0; padding: 9px 11px; text-align: left;
+  background: var(--panel); border: 2px solid var(--gold); color: var(--gold);
+  font-size: 13px;
+}
+.chat__place .muted { font-size: 11px; }
+.chat__msgs { flex: 1; overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.chat__msgs::-webkit-scrollbar { width: 6px; }
+.chat__msgs::-webkit-scrollbar-thumb { background: var(--line-dim); }
+.chat__bar { flex-shrink: 0; margin: 0 14px 14px; }
+
+.msg { display: flex; flex-direction: column; align-items: flex-start; max-width: 85%; }
+.msg--me { align-self: flex-end; align-items: flex-end; }
+.msg__who { font-size: 11px; color: var(--dim); margin-bottom: 3px; }
+.msg__bubble {
+  border: 2px solid var(--line-dim); background: var(--panel);
+  padding: 8px 11px; font-size: 14px;
+}
+.msg--me .msg__bubble { border-color: var(--gold); color: var(--gold); background: var(--bg); }
 
 .dots { display: inline-flex; gap: 4px; }
 .dots i { width: 6px; height: 6px; background: var(--gold); animation: bounce 1.1s infinite; }
