@@ -2,11 +2,24 @@ import { useEffect, useState } from 'react'
 
 /* ───────────────────────────────────────────────────────────────────────────
    SPRITE SLOT
-   Drop any image at  public/sans.png  and it is used automatically — no code
-   change needed. If the file isn't there, the hand-drawn pixel skull below is
-   rendered instead. Change SPRITE_SRC if you'd rather use a different name.
+   Drop a PNG in  public/  named any of the below and it's used everywhere Sans
+   appears — no code change needed. Whichever loads first wins; if none exist,
+   the hand-drawn pixel skull below is rendered instead.
+
+   The comment here used to promise public/sans.png while the code only ever
+   tried one hardcoded filename, so a correctly-placed sprite could sit there
+   being ignored. Now it tries each in turn.
+
+   Two slots, because the head reads better in a tight avatar and the
+   full-body sprite reads better next to dialogue:
+     public/sans.png       — head only (login gate, small avatars)
+     public/sans-full.png  — full body (Sans's dialogue box)
+   A missing full-body sprite falls back to the head, then to the drawing.
    ─────────────────────────────────────────────────────────────────────────── */
-const SPRITE_SRC = '/sans-undertale-icon-29.png'
+const SPRITES = {
+  face: ['/sans.png', '/sans-undertale-icon-29.png', '/sans.webp'],
+  full: ['/sans-full.png', '/sans-body.png', '/sans-full.webp'],
+}
 
 /** Pixel rows of the skull: [y, xStart, width] on a 24×24 grid. */
 const SKULL = [
@@ -60,26 +73,43 @@ function PixelSkull({ glow }) {
 }
 
 /**
- * Renders the sprite if one exists at SPRITE_SRC, otherwise the pixel skull.
- * The probe runs once per page load and is cached in module scope.
+ * Renders the first sprite that loads, otherwise the pixel skull. The probe
+ * runs once per page load and the result is cached in module scope, so a
+ * screen full of Sans faces costs one lookup, not one per instance.
  */
-let spriteStatus = 'unknown' // 'unknown' | 'ok' | 'missing'
+const resolved = {} // variant → path or null, once known
+const probes = {} // variant → in-flight promise, shared by every mounted face
 
-export function SansFace({ className = '', glow = true }) {
-  const [status, setStatus] = useState(spriteStatus)
+const loads = (src) =>
+  new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => resolve(src)
+    img.onerror = () => resolve(null)
+    img.src = src
+  })
+
+function probe(variant) {
+  probes[variant] ??= SPRITES[variant]
+    .reduce((chain, src) => chain.then((hit) => hit ?? loads(src)), Promise.resolve(null))
+    // A project with only the head sprite still gets a sprite in the dialogue.
+    .then((hit) => (hit || variant === 'face' ? hit : probe('face')))
+    .then((hit) => { resolved[variant] = hit; return hit })
+  return probes[variant]
+}
+
+export function SansFace({ className = '', glow = true, variant = 'face' }) {
+  const [src, setSrc] = useState(resolved[variant] ?? null)
 
   useEffect(() => {
-    if (spriteStatus !== 'unknown') return
-    const img = new Image()
-    img.onload = () => { spriteStatus = 'ok'; setStatus('ok') }
-    img.onerror = () => { spriteStatus = 'missing'; setStatus('missing') }
-    img.src = SPRITE_SRC
-  }, [])
+    let alive = true
+    probe(variant).then((hit) => { if (alive && hit) setSrc(hit) })
+    return () => { alive = false }
+  }, [variant])
 
   return (
-    <div className={`sansface ${className}`}>
-      {status === 'ok'
-        ? <img src={SPRITE_SRC} alt="Sans" className="sansface__img" />
+    <div className={`sansface ${variant === 'full' ? 'sansface--full' : ''} ${className}`}>
+      {src
+        ? <img src={src} alt="Sans" className="sansface__img" />
         : <PixelSkull glow={glow} />}
     </div>
   )
@@ -104,13 +134,13 @@ function useTypewriter(text, speed = 16, enabled = true) {
   return shown
 }
 
-export function SansDialog({ text, sub, type = 'sans', typing = true, children }) {
+export function SansDialog({ text, sub, type = 'sans', typing = true, variant = 'face', children }) {
   const shown = useTypewriter(text, 16, typing)
   const done = shown.length >= text.length
 
   return (
     <div className={`dialog dialog--${type}`}>
-      <SansFace />
+      <SansFace variant={variant} />
       <div className="dialog__body">
         <p className={`dialog__text ${done ? '' : 'typing'}`}>
           <span className="star">*</span>

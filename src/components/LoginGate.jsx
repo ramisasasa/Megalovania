@@ -26,7 +26,7 @@ export default function LoginGate({ onSignIn, onSkip }) {
   return (
     <div className="gate">
       <h1 className="gate__title">MEGALOVANIA</h1>
-      <p className="gate__tag">food · turf · gaming · salons — around IUB</p>
+      <p className="gate__tag">your one stop shop to socializing</p>
 
       {step === 'email' ? (
         <>

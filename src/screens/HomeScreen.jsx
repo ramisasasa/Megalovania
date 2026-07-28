@@ -49,6 +49,7 @@ export default function HomeScreen({
   return (
     <div className="screen">
       <SansDialog
+        variant="full"
         text={greetingFor(hour, user?.name)}
         sub={user?.interests?.length
           ? `you said you're into ${user.interests.slice(0, 3).join(', ')}. i remembered.`
