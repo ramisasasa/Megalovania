@@ -22,6 +22,13 @@ const QUERIES = [
   ['cheap burger within 1km', 'fastfood'],
   ['date spot under 800', 'date'],
   ['badminton court', 'sports'],
+  // "sports"/"arena" had no keyword entry at all and parsed as nonsense.
+  ['sports arena nearby', 'sports'],
+  ['football session', 'sports'],
+  ['sports session sunday', 'sports'],
+  // ...and "arena" must not drag the gaming venues that use the word.
+  ['gaming arena', 'gaming'],
+  ['gaming session', 'gaming'],
   ['asdkjh qwerty nonsense', null],
 ]
 
