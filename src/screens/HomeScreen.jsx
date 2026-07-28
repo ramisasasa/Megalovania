@@ -3,12 +3,8 @@ import { SansDialog, greetingFor } from '../components/Sans'
 import PlaceList from '../components/PlaceList'
 import { CATEGORIES } from '../data/places'
 
-const QUICK = [
-  { id: 'explore', icon: '🔍', label: 'Search', sub: 'ask, or filter the map' },
-  { id: 'top', icon: '🏆', label: 'Top picks', sub: 'rated & visited' },
-  { id: 'saved', icon: '⭐', label: 'Saved', sub: 'your favourites' },
-  { id: 'profile', icon: '💀', label: 'Profile', sub: 'points & reviews' },
-]
+// Quick actions used to sit here, but every tile duplicated a bottom-nav tab
+// once Search and Ask merged — so the nav is the only way in now.
 
 // The home screen shows a curated subset, split into places vs. activities so
 // the grid stays breathable. The full 11-category list still lives in Explore.
@@ -40,7 +36,7 @@ function crewNames(students) {
 
 export default function HomeScreen({
   user, hour, recents, forYou, nearby,
-  onNavigate, onAsk, onCategory, onSelectPlace,
+  onAsk, onCategory, onSelectPlace,
   crews = [], onOpenChat,
 }) {
   const [q, setQ] = useState('')
@@ -101,17 +97,6 @@ export default function HomeScreen({
           ))}
         </>
       )}
-
-      <div className="section">Quick actions</div>
-      <div className="tiles tiles--big">
-        {QUICK.map((a) => (
-          <button key={a.id} className="tile" onClick={() => onNavigate(a.id)}>
-            <span className="tile__icon">{a.icon}</span>
-            <span className="tile__label">{a.label}</span>
-            <span className="tile__sub">{a.sub}</span>
-          </button>
-        ))}
-      </div>
 
       <div className="section">What are you interested in exploring</div>
       <div className="tiles tiles--3">
