@@ -92,7 +92,7 @@ export default function ExploreScreen({
             </button>
           ))}
           {filters.categories.length > 0 && (
-            <button className="chip" onClick={() => setFilters((f) => ({ ...f, categories: [] }))}>
+            <button className="chip" onClick={() => setFilters((f) => ({ ...f, categories: [], tags: [] }))}>
               clear
             </button>
           )}

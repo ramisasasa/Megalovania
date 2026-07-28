@@ -2,12 +2,32 @@ import { useState } from 'react'
 import { SansDialog } from '../components/Sans'
 import { CATEGORIES } from '../data/places'
 
+// Same split as the home screen, so the app speaks one language throughout.
+const ACTIVITY_IDS = ['gaming', 'sports', 'movies', 'hangout']
+const ACTIVITIES = CATEGORIES.filter((c) => ACTIVITY_IDS.includes(c.id))
+const SPOTS = CATEGORIES.filter((c) => !ACTIVITY_IDS.includes(c.id))
+
 export default function InterestsScreen({ user, onSave, onBack, firstRun = false }) {
   const [picked, setPicked] = useState(user?.interests ?? [])
 
   function toggle(id) {
     setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
   }
+
+  const grid = (list) => (
+    <div className="interests">
+      {list.map((c) => (
+        <button
+          key={c.id}
+          className={picked.includes(c.id) ? 'interest interest--on' : 'interest'}
+          onClick={() => toggle(c.id)}
+        >
+          <span className="interest__icon">{c.icon}</span>
+          <span className="interest__label">{c.label}</span>
+        </button>
+      ))}
+    </div>
+  )
 
   return (
     <div className="screen">
@@ -23,18 +43,11 @@ export default function InterestsScreen({ user, onSave, onBack, firstRun = false
         typing={false}
       />
 
-      <div className="interests">
-        {CATEGORIES.map((c) => (
-          <button
-            key={c.id}
-            className={picked.includes(c.id) ? 'interest interest--on' : 'interest'}
-            onClick={() => toggle(c.id)}
-          >
-            <span className="interest__icon">{c.icon}</span>
-            <span className="interest__label">{c.label}</span>
-          </button>
-        ))}
-      </div>
+      <div className="section">Places you'd explore</div>
+      {grid(SPOTS)}
+
+      <div className="section">Activities you'd join</div>
+      {grid(ACTIVITIES)}
 
       <div className="btnrow" style={{ marginTop: 16 }}>
         {!firstRun && (
