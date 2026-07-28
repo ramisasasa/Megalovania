@@ -6,8 +6,8 @@ import { CATEGORIES } from '../data/places'
 const QUICK = [
   { id: 'explore', icon: '🗺️', label: 'Search', sub: 'browse the map' },
   { id: 'ask', icon: '💬', label: 'Ask Sans', sub: 'in plain english' },
+  { id: 'top', icon: '🏆', label: 'Top picks', sub: 'rated & visited' },
   { id: 'saved', icon: '⭐', label: 'Saved', sub: 'your favourites' },
-  { id: 'settings', icon: '⚙️', label: 'Settings', sub: 'range, privacy' },
 ]
 
 export default function HomeScreen({

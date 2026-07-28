@@ -5,6 +5,7 @@ import PlaceDetail from './components/PlaceDetail'
 import AddSpotModal from './components/AddSpotModal'
 import HomeScreen from './screens/HomeScreen'
 import AskScreen from './screens/AskScreen'
+import RecommendedScreen from './screens/RecommendedScreen'
 import ExploreScreen from './screens/ExploreScreen'
 import SavedScreen from './screens/SavedScreen'
 import ProfileScreen from './screens/ProfileScreen'
@@ -13,14 +14,14 @@ import InterestsScreen from './screens/InterestsScreen'
 import SettingsScreen from './screens/SettingsScreen'
 import { SEED_PLACES, CITY } from './data/places'
 import { searchPlaces, runNaturalSearch } from './lib/search'
-import { distanceMeters, bayesianScore } from './lib/geo'
+import { distanceMeters, bayesianScore, isOpenAt } from './lib/geo'
 import { loadState, saveState, resetState } from './lib/store'
 
 const BASE_FILTERS = { categories: [], maxBudget: 3500, openNow: false, tags: [] }
 
 /** Which bottom-nav tab should light up for a given screen. */
 const TAB_FOR = {
-  home: 'home', explore: 'explore', ask: 'ask', saved: 'saved',
+  home: 'home', explore: 'explore', ask: 'ask', top: 'top', saved: 'saved',
   profile: 'profile', settings: 'profile', editProfile: 'profile', interests: 'profile',
 }
 
@@ -111,9 +112,25 @@ export default function App() {
         place: p,
         dist: distanceMeters(userLocation, p),
         stars: bayesianScore(p.reviews),
-        open: true,
+        open: isOpenAt(p, hour),
       })),
-    [state.favourites, allPlaces, userLocation]
+    [state.favourites, allPlaces, userLocation, hour]
+  )
+
+  /** Highest-rated places inside the current radius. */
+  const recommended = useMemo(
+    () => [...nearby].sort((a, b) => b.stars - a.stars).slice(0, 6),
+    [nearby]
+  )
+
+  /** Places this browser has opened most, inside the current radius. */
+  const mostVisited = useMemo(
+    () => nearby
+      .map((r) => ({ ...r, visits: state.visits[r.place.id] ?? 0 }))
+      .filter((r) => r.visits > 0)
+      .sort((a, b) => b.visits - a.visits)
+      .slice(0, 6),
+    [nearby, state.visits]
   )
 
   const selected = useMemo(() => {
@@ -266,6 +283,15 @@ export default function App() {
         onSelect={openPlace}
         area={state.user?.area ?? CITY.area}
         recents={state.recents}
+      />
+    ),
+    top: (
+      <RecommendedScreen
+        recommended={recommended}
+        mostVisited={mostVisited}
+        radius={radius}
+        onSelect={openPlace}
+        onNavigate={setScreen}
       />
     ),
     saved: <SavedScreen results={savedResults} onSelect={openPlace} onNavigate={setScreen} />,
