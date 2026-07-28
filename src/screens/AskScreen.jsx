@@ -87,11 +87,9 @@ export default function AskScreen({ answer, thinking, onSearch, onClear, onSelec
             </button>
           ))}
 
-          {answer.picks.length > 0 && (
-            <button className="btn btn--ghost btn--full" onClick={() => { onClear(); setQ('') }}>
-              ask something else
-            </button>
-          )}
+          <button className="btn btn--ghost btn--full" onClick={() => { onClear(); setQ('') }}>
+            ask something else
+          </button>
         </div>
       )}
 

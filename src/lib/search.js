@@ -204,7 +204,7 @@ function budgetFit(place, maxPrice) {
 function recency(place) {
   if (!place.reviews.length) return 0.3
   const newest = place.reviews.map((r) => new Date(r.date).getTime()).sort((a, b) => b - a)[0]
-  const days = (Date.parse('2026-07-28') - newest) / 86400000
+  const days = (Date.now() - newest) / 86400000
   return Math.max(0.2, 1 - days / 365)
 }
 
@@ -242,7 +242,9 @@ export function searchPlaces(places, ctx) {
       if (distanceMeters(userLocation, p) > radius) return false
       // Category is a hard gate, from the chips or from the parsed query.
       if (!inCategories(p, filters.categories)) return false
-      if (filters.maxBudget != null && p.priceMin > filters.maxBudget) return false
+      // The budget slider's top position (3500) reads "any" in the UI, so it
+      // must not exclude anything — including pricier user-added spots.
+      if (filters.maxBudget != null && filters.maxBudget < 3500 && p.priceMin > filters.maxBudget) return false
       if (filters.openNow && !isOpenAt(p, hour)) return false
       return true
     })
