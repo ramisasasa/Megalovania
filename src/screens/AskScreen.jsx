@@ -76,10 +76,16 @@ export default function AskScreen({ answer, thinking, onSearch, onClear, onSelec
                 <span className="pick__title">
                   {pick.name}
                   <span className="pick__stars">★ {pick.stars.toFixed(1)}</span>
-                  {!pick.open && <span className="chip chip--closed">CLOSED</span>}
+                  {!pick.open && (
+                    <span className="chip chip--closed">
+                      {pick.opensAt ? `OPENS ${pick.opensAt.toUpperCase()}` : 'CLOSED'}
+                    </span>
+                  )}
                 </span>
                 <span className="pick__meta">
-                  {pick.price} · {formatDistance(pick.dist)} · {walkMinutes(pick.dist)} min walk
+                  {pick.price}
+                  {pick.typical != null && ` (≈৳${pick.typical} typical)`}
+                  {' · '}{formatDistance(pick.dist)} · {walkMinutes(pick.dist)} min walk
                 </span>
                 <span className="pick__why">{pick.why}</span>
                 {pick.caveat && <span className="pick__caveat">! {pick.caveat}</span>}
