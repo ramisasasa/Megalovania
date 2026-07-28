@@ -46,3 +46,26 @@ export function isOpenAt(place, hour) {
   if (close > open) return hour >= open && hour < close
   return hour >= open || hour < close // wraps midnight
 }
+
+/** "9am" / "12pm" / "11pm" — for telling someone when a shut place reopens. */
+export function formatHour(hour) {
+  const h = ((hour % 24) + 24) % 24
+  if (h === 0) return 'midnight'
+  if (h === 12) return 'noon'
+  return h < 12 ? `${h}am` : `${h - 12}pm`
+}
+
+/** Hours until this place next opens. 0 if it's open right now. */
+export function hoursUntilOpen(place, hour) {
+  if (isOpenAt(place, hour)) return 0
+  return (((place.hours.open - hour) % 24) + 24) % 24
+}
+
+/**
+ * What you should expect to actually spend, not the best case. A place listed
+ * at ৳800–1100 is not a "under ৳800" answer, and ranking on priceMin alone is
+ * how it ends up looking like one.
+ */
+export function typicalPrice(place) {
+  return (place.priceMin + place.priceMax) / 2
+}

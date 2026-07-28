@@ -27,6 +27,7 @@ const ACTIVITY_TILES = [
 ]
 
 const LABEL = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.label.toLowerCase()]))
+const ICON = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.icon]))
 
 function crewNames(students) {
   const names = students.map((s) => s.name)
@@ -55,6 +56,8 @@ export default function HomeScreen({
           : 'tip: set your interests in your profile and i\'ll tune the suggestions.'}
       />
 
+      <div className="section">Ask or join</div>
+
       <form className="askbar" onSubmit={submit}>
         <span className="soul soul--pulse" />
         <input
@@ -67,10 +70,16 @@ export default function HomeScreen({
 
       {crews.length > 0 && (
         <>
-          <div className="section">Your crew</div>
+          <p className="crew__lead">
+            or skip the search — {crews.length === 1 ? 'this group is' : 'these groups are'} already
+            going somewhere.
+          </p>
           {crews.map((c) => (
             <div key={c.category} className="crew">
               <div className="crew__faces">
+                <span className="crew__act" title={LABEL[c.category]}>
+                  {ICON[c.category] ?? '✨'}
+                </span>
                 {c.students.slice(0, 3).map((s) => <span key={s.id}>{s.avatar}</span>)}
               </div>
               <p className="crew__text">

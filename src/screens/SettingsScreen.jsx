@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { SansDialog } from '../components/Sans'
 import { formatDistance } from '../lib/geo'
 import { CITY } from '../data/places'
@@ -8,6 +9,27 @@ export default function SettingsScreen({
   settings, setSettings, favourites, places, onSelectPlace, onRemoveFavourite,
   onBack, onReset,
 }) {
+  // Edited locally until you hit save, so the screen can tell you plainly
+  // whether your preferences are stored or still pending.
+  const [draft, setDraft] = useState(settings)
+  const [justSaved, setJustSaved] = useState(false)
+
+  const dirty =
+    draft.proximity !== settings.proximity ||
+    draft.anonymous !== settings.anonymous ||
+    draft.openOnly !== settings.openOnly
+
+  useEffect(() => {
+    if (!justSaved) return
+    const id = setTimeout(() => setJustSaved(false), 2200)
+    return () => clearTimeout(id)
+  }, [justSaved])
+
+  function save() {
+    setSettings(() => draft)
+    setJustSaved(true)
+  }
+
   const favPlaces = favourites
     .map((id) => places.find((p) => p.id === id))
     .filter(Boolean)
@@ -24,14 +46,14 @@ export default function SettingsScreen({
       <div className="section">Proximity</div>
       <div className="filters__label">
         <span>default search range</span>
-        <span className="filters__value">{formatDistance(settings.proximity)}</span>
+        <span className="filters__value">{formatDistance(draft.proximity)}</span>
       </div>
       <div className="seg" style={{ marginTop: 6 }}>
         {RADII.map((r) => (
           <button
             key={r}
-            className={settings.proximity === r ? 'seg__btn seg__btn--on' : 'seg__btn'}
-            onClick={() => setSettings((s) => ({ ...s, proximity: r }))}
+            className={draft.proximity === r ? 'seg__btn seg__btn--on' : 'seg__btn'}
+            onClick={() => setDraft((s) => ({ ...s, proximity: r }))}
           >
             {r < 1000 ? `${r}m` : `${r / 1000}km`}
           </button>
@@ -45,13 +67,13 @@ export default function SettingsScreen({
       <label className="toggle toggle--row">
         <input
           type="checkbox"
-          checked={settings.anonymous}
-          onChange={(e) => setSettings((s) => ({ ...s, anonymous: e.target.checked }))}
+          checked={draft.anonymous}
+          onChange={(e) => setDraft((s) => ({ ...s, anonymous: e.target.checked }))}
         />
         <span>
           <strong>post anonymously</strong>
           <em>
-            {settings.anonymous
+            {draft.anonymous
               ? 'your reviews show as "anonymous". nobody sees your name.'
               : 'your reviews are signed with your display name.'}
           </em>
@@ -61,14 +83,30 @@ export default function SettingsScreen({
       <label className="toggle toggle--row" style={{ marginTop: 8 }}>
         <input
           type="checkbox"
-          checked={settings.openOnly}
-          onChange={(e) => setSettings((s) => ({ ...s, openOnly: e.target.checked }))}
+          checked={draft.openOnly}
+          onChange={(e) => setDraft((s) => ({ ...s, openOnly: e.target.checked }))}
         />
         <span>
           <strong>hide closed places</strong>
           <em>only show spots that are open at the time you're searching.</em>
         </span>
       </label>
+
+      <div className="savebar">
+        <button className="btn btn--gold btn--full" disabled={!dirty} onClick={save}>
+          {dirty ? 'save preferences' : justSaved ? '✓ saved' : 'preferences saved'}
+        </button>
+        {dirty && (
+          <button className="btn btn--ghost btn--full" onClick={() => setDraft(settings)}>
+            discard changes
+          </button>
+        )}
+        <p className={dirty ? 'savebar__note savebar__note--warn' : 'savebar__note'}>
+          {dirty
+            ? 'unsaved changes — they apply once you hit save.'
+            : 'stored on this browser. applies to home, search and Sans.'}
+        </p>
+      </div>
 
       <div className="section">Favourite spots ({favPlaces.length})</div>
       {favPlaces.length === 0 ? (

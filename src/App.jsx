@@ -19,7 +19,9 @@ import { searchPlaces, runNaturalSearch } from './lib/search'
 import { distanceMeters, bayesianScore, isOpenAt } from './lib/geo'
 import { loadState, saveState, resetState } from './lib/store'
 
-const BASE_FILTERS = { categories: [], maxBudget: 3500, openNow: false, tags: [] }
+// `null` budget means "no cap" — the engine treats it as unbounded rather than
+// relying on a sentinel number that leaks UI detail into the ranking.
+const BASE_FILTERS = { categories: [], minBudget: null, maxBudget: null, openNow: false, tags: [] }
 
 /** Which bottom-nav tab should light up for a given screen. */
 const TAB_FOR = {
