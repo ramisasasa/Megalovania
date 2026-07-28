@@ -5,10 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="50a07f8f-99b7-495f-9bee-79680338fbbc" name="Changes" comment="initial commit">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.puku/puku-embeddings.db" beforeDir="false" afterPath="$PROJECT_DIR$/.puku/puku-embeddings.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.puku/puku-embeddings.db-wal" beforeDir="false" afterPath="$PROJECT_DIR$/.puku/puku-embeddings.db-wal" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Sans.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Sans.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
