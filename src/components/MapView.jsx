@@ -1,6 +1,9 @@
 import { useEffect, useMemo } from 'react'
 import { MapContainer, TileLayer, Marker, Circle, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
+// Bundled, not CDN — if the stylesheet fails to load, Leaflet's tiles escape
+// their container and cover the whole app, swallowing every click.
+import 'leaflet/dist/leaflet.css'
 import { CATEGORIES } from '../data/places'
 
 const ICON_FOR = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.icon]))

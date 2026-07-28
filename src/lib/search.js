@@ -1,4 +1,7 @@
-import { distanceMeters, bayesianScore, isOpenAt, formatDistance } from './geo.js'
+import {
+  distanceMeters, bayesianScore, isOpenAt, formatDistance,
+  typicalPrice, hoursUntilOpen, formatHour,
+} from './geo.js'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Query understanding.
@@ -192,12 +195,26 @@ function tagMatch(place, tags) {
   return hits / tags.length
 }
 
-/** 1.0 fully inside budget, tapering to 0 as it goes over. */
+/**
+ * 1.0 when the whole range sits inside budget, tapering as the typical spend
+ * climbs past it. Scored on the midpoint, not priceMin — see typicalPrice.
+ */
 function budgetFit(place, maxPrice) {
   if (maxPrice == null) return 0.6
-  if (place.priceMin <= maxPrice) return 1
-  const over = (place.priceMin - maxPrice) / maxPrice
-  return Math.max(0, 1 - over)
+  if (place.priceMax <= maxPrice) return 1
+  const typical = typicalPrice(place)
+  if (typical <= maxPrice) return 0.8 // top of the range spills over, still fine
+  return Math.max(0, 1 - (typical - maxPrice) / maxPrice)
+}
+
+/**
+ * Open now beats shut, and "shut but opens in an hour" beats "shut until
+ * tomorrow". Without this the ranking recommends places you cannot walk into.
+ */
+function opennessFit(place, hour) {
+  const wait = hoursUntilOpen(place, hour)
+  if (wait === 0) return 1
+  return Math.max(0, 0.5 - wait * 0.05)
 }
 
 /** Recent reviews should count for more than three-year-old ones. */
@@ -218,15 +235,21 @@ export function scorePlace(place, ctx) {
   const relevance = tagMatch(place, filters.tags || [])
 
   // Relevance carries the most weight — answering the right question beats
-  // answering the wrong one well.
+  // answering the wrong one well. Openness is next: a shut place is not an
+  // answer to "where should I go", however good it is.
   const score =
-    0.3 * relevance +
-    0.25 * normStars +
-    0.2 * distanceDecay +
-    0.15 * budgetFit(place, filters.maxPrice) +
-    0.1 * recency(place)
+    0.28 * relevance +
+    0.2 * normStars +
+    0.17 * opennessFit(place, hour) +
+    0.15 * distanceDecay +
+    0.12 * budgetFit(place, filters.maxPrice) +
+    0.08 * recency(place)
 
-  return { place, dist, stars, score, relevance, open: isOpenAt(place, hour) }
+  return {
+    place, dist, stars, score, relevance,
+    open: isOpenAt(place, hour),
+    opensIn: hoursUntilOpen(place, hour),
+  }
 }
 
 /** Does this place belong to any of the requested categories? */
@@ -242,9 +265,11 @@ export function searchPlaces(places, ctx) {
       if (distanceMeters(userLocation, p) > radius) return false
       // Category is a hard gate, from the chips or from the parsed query.
       if (!inCategories(p, filters.categories)) return false
-      // The budget slider's top position (3500) reads "any" in the UI, so it
-      // must not exclude anything — including pricier user-added spots.
-      if (filters.maxBudget != null && filters.maxBudget < 3500 && p.priceMin > filters.maxBudget) return false
+      // Budget is judged on typical spend. "under ৳800" must not return a
+      // ৳800–1100 place just because its floor technically touches the cap.
+      // `null` means "no cap" — the UI maps its slider maximum to null.
+      if (filters.maxBudget != null && typicalPrice(p) > filters.maxBudget) return false
+      if (filters.minBudget != null && p.priceMax < filters.minBudget) return false
       if (filters.openNow && !isOpenAt(p, hour)) return false
       return true
     })
@@ -311,21 +336,28 @@ export function buildAnswer(query, results, ctx) {
     return {
       headline: `No ${subject} spots matched within ${formatDistance(ctx.radius)}.`,
       body: parsed.maxPrice
-        ? `Nothing in range under ৳${parsed.maxPrice}. Try raising the budget or widening the radius.`
+        ? `Nothing in range where you'd typically spend under ৳${parsed.maxPrice}. Try raising the budget or widening the radius.`
         : `Try widening the radius — there's nothing in this category nearby.`,
       picks: [],
     }
   }
 
   const best = top[0]
+  const openCount = top.filter((r) => r.open).length
+
   const headline = `${top.length} ${subject} option${top.length > 1 ? 's' : ''}${
-    parsed.maxPrice ? ` under ৳${parsed.maxPrice}` : ''
-  } within ${formatDistance(ctx.radius)}.`
+    parsed.maxPrice ? ` you'd typically do for under ৳${parsed.maxPrice}` : ''
+  } within ${formatDistance(ctx.radius)}${
+    openCount ? `, ${openCount} open now` : ' — all shut right now'
+  }.`
 
   const body =
     `${best.place.name} is your best bet — ${best.stars.toFixed(1)}★ from ` +
     `${best.place.reviews.length} review${best.place.reviews.length > 1 ? 's' : ''}, ` +
-    `${formatDistance(best.dist)} away, ৳${best.place.priceMin}–${best.place.priceMax} per person.`
+    `${formatDistance(best.dist)} away, ৳${best.place.priceMin}–${best.place.priceMax} per person.` +
+    (best.open
+      ? ' Open now.'
+      : ` Closed — opens ${formatHour(best.place.hours.open)}.`)
 
   const picks = top.map((r) => ({
     id: r.place.id,
@@ -333,7 +365,10 @@ export function buildAnswer(query, results, ctx) {
     stars: r.stars,
     dist: r.dist,
     open: r.open,
+    opensAt: r.open ? null : formatHour(r.place.hours.open),
     price: `৳${r.place.priceMin}–${r.place.priceMax}`,
+    // Shown when a budget was named, so a wide range can't read as a promise.
+    typical: parsed.maxPrice ? Math.round(typicalPrice(r.place)) : null,
     why: bestQuote(r.place)?.text ?? r.place.blurb,
     caveat: caveat(r.place),
   }))
@@ -362,6 +397,7 @@ export function runNaturalSearch(query, places, ctx) {
     tags: parsed.tags,
     maxPrice: parsed.maxPrice,
     maxBudget: parsed.maxPrice ?? ctx.filters.maxBudget,
+    minBudget: parsed.maxPrice ? null : ctx.filters.minBudget,
     categories: parsed.categories.length ? parsed.categories : ctx.filters.categories,
     openNow: parsed.openNow || ctx.filters.openNow,
     strictRelevance: true,

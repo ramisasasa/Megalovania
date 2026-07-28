@@ -3,6 +3,7 @@ import { OPENERS, REPLIES } from '../data/students'
 import { CATEGORIES } from '../data/places'
 
 const LABEL = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.label]))
+const ICON = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.icon]))
 
 export default function CrewChatScreen({ crew, messages, onSend, onBack, onSelectPlace, user }) {
   const [text, setText] = useState('')
@@ -40,6 +41,7 @@ export default function CrewChatScreen({ crew, messages, onSend, onBack, onSelec
         <button className="back" style={{ margin: 0 }} onClick={onBack}>← back</button>
         <div className="chat__who">
           <span className="chat__faces">
+            <i className="crew__act">{ICON[crew.category] ?? '✨'}</i>
             {crew.students.slice(0, 4).map((s) => <i key={s.id}>{s.avatar}</i>)}
           </span>
           <span className="chat__names">

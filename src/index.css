@@ -87,7 +87,9 @@ input, textarea, select { font-family: var(--font); }
   padding: 12px 14px 10px;
   background: var(--bg);
   position: relative;
-  z-index: 30;
+  /* Above Leaflet's internal panes (400–700) — otherwise the Explore map
+     silently swallows clicks on the settings and profile buttons. */
+  z-index: 1200;
 }
 .topbar__title {
   font-family: var(--font-title);
@@ -362,6 +364,23 @@ input, textarea, select { font-family: var(--font); }
 .chip--new { border-color: var(--sans); color: var(--sans); padding: 2px 7px; font-size: 11px; }
 .chips__count { margin-left: auto; font-size: 12px; color: var(--dim); }
 
+/* Manual min/max budget entry, under the coarse slider. */
+.range { display: flex; align-items: flex-end; gap: 8px; margin-top: 8px; }
+.range__field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.range__field span {
+  font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--dim);
+}
+.range__field input {
+  background: var(--bg); border: 2px solid var(--line-dim); color: var(--text);
+  padding: 7px 8px; font-family: inherit; font-size: 13px; width: 100%;
+}
+.range__field input:focus { outline: 0; border-color: var(--gold); }
+.range__dash { color: var(--dim); padding-bottom: 9px; }
+.range__clear {
+  background: none; border: 0; color: var(--gold);
+  font-size: 12px; padding: 0 0 9px; white-space: nowrap;
+}
+
 .filters { display: flex; flex-direction: column; gap: 12px; }
 .filters__label {
   font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
@@ -586,7 +605,8 @@ input, textarea, select { font-family: var(--font); }
   border-top: 2px solid var(--line);
   background: var(--bg);
   display: grid; grid-template-columns: repeat(6, 1fr);
-  z-index: 30;
+  position: relative;
+  z-index: 1200; /* same reason as .topbar — Leaflet panes outrank 30 */
 }
 .navbtn {
   background: none; border: 0; color: var(--dim);
@@ -672,6 +692,16 @@ input, textarea, select { font-family: var(--font); }
 .crew__text { margin: 0 0 10px; font-size: 13.5px; color: var(--muted); }
 .crew__text b { color: var(--text); font-weight: 400; }
 .crew__btns { display: flex; gap: 8px; }
+
+/* The shared interest itself, marked off from the member avatars. */
+.crew__act { border-color: var(--gold) !important; }
+.crew__faces .crew__act + span { margin-left: 6px; }
+.crew__lead { margin: 0 0 10px; font-size: 12.5px; color: var(--dim); }
+
+/* Settings save bar. */
+.savebar { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+.savebar__note { margin: 0; font-size: 12px; color: var(--dim); text-align: center; }
+.savebar__note--warn { color: var(--gold); }
 
 .chat { display: flex; flex-direction: column; overflow: hidden; }
 .chat__head {

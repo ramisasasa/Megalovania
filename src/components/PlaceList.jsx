@@ -1,4 +1,4 @@
-import { formatDistance, walkMinutes } from '../lib/geo'
+import { formatDistance, walkMinutes, formatHour } from '../lib/geo'
 import { CITY } from '../data/places'
 
 export default function PlaceList({ results, selectedId, onSelect, emptyHint }) {
@@ -36,7 +36,9 @@ export default function PlaceList({ results, selectedId, onSelect, emptyHint }) 
                 ? 'Free'
                 : `${CITY.currency}${place.priceMin}–${place.priceMax}`}
             </span>
-            <span className={open ? 'ok' : 'muted'}>{open ? 'Open now' : 'Closed'}</span>
+            <span className={open ? 'ok' : 'muted'}>
+              {open ? 'Open now' : `Opens ${formatHour(place.hours.open)}`}
+            </span>
             <span className="muted">{place.reviews.length} reviews</span>
           </div>
         </button>
