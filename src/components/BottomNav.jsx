@@ -1,7 +1,7 @@
 const TABS = [
   { id: 'home', icon: '🏠', label: 'HOME' },
-  { id: 'explore', icon: '🗺️', label: 'SEARCH' },
-  { id: 'ask', icon: '💬', label: 'ASK' },
+  // Search and Ask were the same question asked two ways — one tab now.
+  { id: 'explore', icon: '🔍', label: 'SEARCH' },
   { id: 'top', icon: '🏆', label: 'TOP' },
   { id: 'saved', icon: '⭐', label: 'SAVED' },
   { id: 'profile', icon: '💀', label: 'PROFILE' },

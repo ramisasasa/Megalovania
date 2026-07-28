@@ -4,10 +4,10 @@ import PlaceList from '../components/PlaceList'
 import { CATEGORIES } from '../data/places'
 
 const QUICK = [
-  { id: 'explore', icon: '🗺️', label: 'Search', sub: 'browse the map' },
-  { id: 'ask', icon: '💬', label: 'Ask Sans', sub: 'in plain english' },
+  { id: 'explore', icon: '🔍', label: 'Search', sub: 'ask, or filter the map' },
   { id: 'top', icon: '🏆', label: 'Top picks', sub: 'rated & visited' },
   { id: 'saved', icon: '⭐', label: 'Saved', sub: 'your favourites' },
+  { id: 'profile', icon: '💀', label: 'Profile', sub: 'points & reviews' },
 ]
 
 // The home screen shows a curated subset, split into places vs. activities so

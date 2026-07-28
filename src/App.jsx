@@ -4,9 +4,8 @@ import LoginGate from './components/LoginGate'
 import PlaceDetail from './components/PlaceDetail'
 import AddSpotModal from './components/AddSpotModal'
 import HomeScreen from './screens/HomeScreen'
-import AskScreen from './screens/AskScreen'
+import SearchScreen from './screens/SearchScreen'
 import RecommendedScreen from './screens/RecommendedScreen'
-import ExploreScreen from './screens/ExploreScreen'
 import SavedScreen from './screens/SavedScreen'
 import ProfileScreen from './screens/ProfileScreen'
 import EditProfileScreen from './screens/EditProfileScreen'
@@ -25,7 +24,7 @@ const BASE_FILTERS = { categories: [], minBudget: null, maxBudget: null, openNow
 
 /** Which bottom-nav tab should light up for a given screen. */
 const TAB_FOR = {
-  home: 'home', explore: 'explore', ask: 'ask', top: 'top', saved: 'saved',
+  home: 'home', explore: 'explore', top: 'top', saved: 'saved',
   profile: 'profile', settings: 'profile', editProfile: 'profile', interests: 'profile',
   crewChat: 'home',
 }
@@ -189,7 +188,7 @@ export default function App() {
   }
 
   function runSearch(q) {
-    navigate('ask')
+    navigate('explore')
     setThinking(true)
     setAnswer(null)
     setState((s) => ({ ...s, recents: [q, ...s.recents.filter((r) => r !== q)].slice(0, 8) }))
@@ -317,7 +316,7 @@ export default function App() {
       />
     ),
     explore: (
-      <ExploreScreen
+      <SearchScreen
         userLocation={userLocation}
         radius={radius}
         setRadius={(r) => { setRadius(r); clearSearch() }}
@@ -329,15 +328,10 @@ export default function App() {
         pinMode={pinMode}
         setPinMode={setPinMode}
         onMapClick={setPendingCoords}
-      />
-    ),
-    ask: (
-      <AskScreen
         answer={answer}
         thinking={thinking}
         onSearch={runSearch}
         onClear={clearSearch}
-        onSelect={openPlace}
         area={state.user?.area ?? CITY.area}
         recents={state.recents}
       />
