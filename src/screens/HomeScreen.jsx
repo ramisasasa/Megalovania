@@ -15,15 +15,18 @@ const QUICK = [
 const EXPLORE_TILES = [
   { icon: '☕', label: 'Cafés', categories: ['cafe'] },
   { icon: '🍽️', label: 'Restaurants', categories: ['restaurant'] },
-  { icon: '⚽', label: 'Sports', categories: ['sports'] },
+  { icon: '🥐', label: 'Bakeries', categories: ['bakery'] },
 ]
 
+// Sports lives here as "Football Sessions" rather than in the row above —
+// booking a turf slot is something you join, not a venue you browse.
 const ACTIVITY_TILES = [
-  { icon: '🎬', label: 'Movies', categories: ['movies'] },
-  { icon: '🛋️', label: 'Chill Hangouts', categories: ['hangout'] },
+  { icon: '⚽', label: 'Football Sessions', categories: ['sports'], tags: ['football', 'turf'] },
+  { icon: '🎮', label: 'Gaming Sessions', categories: ['gaming'] },
   // Not a category of its own — study spots are cafés ranked by study tags.
   { icon: '📚', label: 'Study Sessions', categories: ['cafe'], tags: ['study', 'wifi', 'quiet'] },
-  { icon: '🎮', label: 'Gaming Sessions', categories: ['gaming'] },
+  { icon: '🎬', label: 'Movies', categories: ['movies'] },
+  { icon: '🛋️', label: 'Chill Hangouts', categories: ['hangout'] },
 ]
 
 const LABEL = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.label.toLowerCase()]))
@@ -121,7 +124,7 @@ export default function HomeScreen({
       </div>
 
       <div className="section">What activities are you interested in joining</div>
-      <div className="tiles">
+      <div className="tiles tiles--flow">
         {ACTIVITY_TILES.map((t) => (
           <button key={t.label} className="tile" onClick={() => onCategory(t)}>
             <span className="tile__icon">{t.icon}</span>

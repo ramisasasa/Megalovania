@@ -22,6 +22,13 @@ import { loadState, saveState, resetState } from './lib/store'
 // relying on a sentinel number that leaks UI detail into the ranking.
 const BASE_FILTERS = { categories: [], minBudget: null, maxBudget: null, openNow: false, tags: [] }
 
+/** Coarse grouping used to keep the two crew suggestions from rhyming. */
+const FAMILY = {
+  cafe: 'food', bakery: 'food', restaurant: 'food', fastfood: 'food',
+  gaming: 'doing', sports: 'doing', movies: 'doing', hangout: 'doing',
+  park: 'doing', date: 'doing', salon: 'errand',
+}
+
 /** Which bottom-nav tab should light up for a given screen. */
 const TAB_FOR = {
   home: 'home', explore: 'explore', top: 'top', saved: 'saved',
@@ -132,21 +139,35 @@ export default function App() {
   )
 
   /** Seed students who share an interest with you, paired with the best spot
-      for it in range — "Rafi + 2 others game just like you, hit Spotlight?" */
+      for it in range — "Rafi + 2 others game just like you, hit Spotlight?"
+      Places span several categories, so a bakery-café can top both lists;
+      each crew claims a distinct venue to avoid suggesting the same outing
+      twice. */
   const crews = useMemo(() => {
     const interests = state.user?.interests ?? []
-    return interests
-      .map((cat) => {
-        const students = SEED_STUDENTS.filter((s) => s.interests.includes(cat))
-        const top = searchPlaces(allPlaces, {
-          userLocation, radius, hour,
-          filters: { ...BASE_FILTERS, categories: [cat] },
-        })[0]
-        if (students.length < 2 || !top) return null
-        return { category: cat, students, place: top.place }
+    const taken = new Set()
+    const candidates = []
+
+    for (const cat of interests) {
+      const students = SEED_STUDENTS.filter((s) => s.interests.includes(cat))
+      if (students.length < 2) continue
+      const ranked = searchPlaces(allPlaces, {
+        userLocation, radius, hour,
+        filters: { ...BASE_FILTERS, categories: [cat] },
       })
-      .filter(Boolean)
-      .slice(0, 2)
+      const pick = ranked.find((r) => !taken.has(r.place.id))
+      if (!pick) continue
+      taken.add(pick.place.id)
+      candidates.push({ category: cat, students, place: pick.place, family: FAMILY[cat] })
+    }
+
+    // Two food crews read as the same suggestion twice — lead with one of each
+    // family so you get somewhere to eat and something to do.
+    const first = candidates[0]
+    if (!first) return []
+    const second =
+      candidates.slice(1).find((c) => c.family !== first.family) ?? candidates[1]
+    return second ? [first, second] : [first]
   }, [state.user, allPlaces, userLocation, radius, hour])
 
   /** Places this browser has opened most, inside the current radius. */
