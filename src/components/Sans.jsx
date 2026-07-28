@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
    change needed. If the file isn't there, the hand-drawn pixel skull below is
    rendered instead. Change SPRITE_SRC if you'd rather use a different name.
    ─────────────────────────────────────────────────────────────────────────── */
-const SPRITE_SRC = '/sans.png'
+const SPRITE_SRC = '/sans-closeup.png'
 
 /** Pixel rows of the skull: [y, xStart, width] on a 24×24 grid. */
 const SKULL = [

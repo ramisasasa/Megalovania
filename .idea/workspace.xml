@@ -5,38 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="50a07f8f-99b7-495f-9bee-79680338fbbc" name="Changes" comment="initial commit">
-      <change afterPath="$PROJECT_DIR$/.puku/puku-embeddings.db" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.puku/puku-embeddings.db-shm" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.puku/puku-embeddings.db-wal" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/test-search.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/App.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/AddSpotModal.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/BottomNav.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/LoginGate.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/MapView.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/PlaceDetail.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/PlaceList.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Sans.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/data/places.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/index.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/geo.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/search.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib/store.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/screens/AskScreen.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/screens/EditProfileScreen.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/screens/ExploreScreen.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/screens/HomeScreen.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/screens/InterestsScreen.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/screens/ProfileScreen.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/screens/SavedScreen.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/screens/SettingsScreen.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/vite.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.puku/puku-embeddings.db-wal" beforeDir="false" afterPath="$PROJECT_DIR$/.puku/puku-embeddings.db-wal" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Sans.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Sans.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
