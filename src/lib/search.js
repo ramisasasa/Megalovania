@@ -75,6 +75,13 @@ const KEYWORD_MAP = [
     match: ['badminton', 'basketball', 'court', 'gym', 'workout', 'tennis', 'indoor sport'],
     tags: ['badminton', 'basketball', 'indoor', 'gym'], categories: ['sports'],
   },
+  {
+    // Bare "sports"/"arena"/"play" had no entry at all, so "sports arena
+    // nearby" parsed as nothing and Sans gave up on it.
+    match: ['sport', 'sports', 'arena', 'complex', 'ground', 'pitch', 'stadium',
+            'practice', 'training', 'play a match', 'kick about', 'jaff'],
+    tags: ['football', 'turf', 'indoor'], categories: ['sports'],
+  },
 
   { match: ['movie', 'cinema', 'film', 'screening', 'showtime'], tags: ['cinema', 'movie'], categories: ['movies'] },
   {
@@ -119,8 +126,13 @@ const PHRASE_OVERRIDES = [
     tags: ['parlour', 'facial', 'spa'], categories: ['salon'] },
   { match: ['coffee shop', 'cafe to study', 'study cafe'],
     tags: ['coffee', 'study', 'wifi', 'quiet'], categories: ['cafe'] },
-  { match: ['football turf', 'turf booking'],
+  { match: ['football turf', 'turf booking', 'football session', 'sports session',
+            'football ground', 'sports arena', 'sports complex'],
     tags: ['football', 'turf'], categories: ['sports'] },
+  // "arena" now means sports, so the gaming venues that use the word need
+  // pinning or "gaming arena" would return a football pitch.
+  { match: ['gaming arena', 'gamers arena', 'esports arena', 'gaming session'],
+    tags: ['gaming', 'pc', 'esports', 'console'], categories: ['gaming'] },
 ]
 
 const VIBE_MAP = [

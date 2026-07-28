@@ -13,9 +13,11 @@
 //     exact branch/block is still worth a check.
 //   [VERIFY]: Kludge Café, Burger Xpress, Khana's Kitchen, Sizzle & Spice,
 //             Bhooter Adda, Rooftop Nine, Spotlight Gaming, Gamers Arena,
-//             Battleground Esports, Kick Off Arena, The Turf Arena,
+//             Battleground Esports, JAFF, Kick Off Arena, The Turf Arena,
 //             Play On Turf, Block G Playground, Sharp Cuts, The Grooming Room,
 //             Glow Beauty Parlour
+//   NOTE: Sports Arena is deliberately absent — it's in Mirpur, and this set is
+//         Bashundhara-only. JAFF is the local turf that replaced it here.
 //
 // Prices are BDT per person. Where a venue charges by the hour for a whole
 // group (turf, courts), priceMin/Max are the PER-PERSON share and `priceNote`
@@ -380,6 +382,22 @@ export const SEED_PLACES = [
   },
 
   // ── Sports & turf ────────────────────────────────────────────────────────
+  {
+    id: 'p40',
+    name: 'JAFF',
+    category: ['sports'],
+    tags: ['football', 'turf', 'futsal', 'floodlights', 'booking', 'group', 'hourly'],
+    lat: 23.8189, lng: 90.4281,
+    priceMin: 140, priceMax: 250,
+    priceNote: '৳1900–3200/hour, split ~14 players',
+    hours: { open: 6, close: 24 },
+    blurb: 'Bashundhara turf that most of the IUB football crowd ends up booking.',
+    reviews: [
+      { user: 'Tahmid R.', stars: 5, body: 'This is where our whole batch books. Turf is well kept, the lights are bright enough for late slots, and the rate split between fourteen of us is nothing.', date: '2026-07-21' },
+      { user: 'Nafis I.', stars: 4, body: 'Easy to get to from campus and the booking process is straightforward. Evening slots go fast so plan ahead.', date: '2026-07-05' },
+      { user: 'Sabbir M.', stars: 3, body: 'Good pitch but the changing area is cramped and there is nowhere proper to leave your bags.', date: '2026-06-22' },
+    ],
+  },
   {
     id: 'p23',
     name: 'Kick Off Arena',

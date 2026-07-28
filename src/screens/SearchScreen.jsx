@@ -13,10 +13,12 @@ const RADII = [500, 1000, 2000, 5000]
 const BUDGET_CAP = 3500
 
 const EXAMPLES = [
-  'gaming cafe nearby',
-  'pastries under ৳200',
-  'quiet cafe to study',
   'football turf tonight',
+  'football session sunday',
+  'badminton court',
+  'gaming cafe nearby',
+  'quiet cafe to study',
+  'pastries under ৳200',
   'date spot under ৳800',
 ]
 
